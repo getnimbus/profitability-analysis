@@ -1,13 +1,6 @@
 #!/usr/bin/env node
 
-import {
-  err,
-  info,
-  linkAddress,
-  setLoadingText,
-  startLoading,
-  stopLoading,
-} from "./logger";
+import { err, info, linkAddress, setLoadingText, startLoading, stopLoading } from "./logger";
 import { logPositionSummaries, writePositionSummaries } from "./write-csv";
 import { args } from "./arguments";
 import { gatherInstructions } from "./gather-instructions";
@@ -15,7 +8,11 @@ import { decodeTransactions } from "./decode-transaction";
 import { analyzePositions, getPositionValues } from "./analyze-position";
 import { fetchPositionsForInstructions } from "./position-fetcher";
 import { fetchPoolsForInstructions } from "./pool-fetcher";
-import { fetchAndBuildCoinIdToMintMap, fetchPricesForInstructions, fetchPricesForPositions } from "./price-fetcher";
+import {
+  fetchAndBuildCoinIdToMintMap,
+  fetchPricesForInstructions,
+  fetchPricesForPositions,
+} from "./price-fetcher";
 import { logLiquidityProviderAggregates, logSummaryAggregates } from "./aggregate";
 import { homedir } from "os";
 import invariant from "tiny-invariant";
@@ -48,16 +45,22 @@ async function analyze() {
   const priceMap = await fetchPricesForInstructions(positionInstructions);
 
   setLoadingText(`Analyzing positions for ${linkedAddresses}`);
-  let summaries = analyzePositions(Array.from(positionInstructions.values()), positionMap, poolMap, tokenMap, priceMap);
-  if (!args.includeOpen) {
-    summaries = summaries.filter((summary) => summary.closedAt);
-  }
+  const summaries = analyzePositions(
+    Array.from(positionInstructions.values()),
+    positionMap,
+    poolMap,
+    tokenMap,
+    priceMap,
+  );
+  // if (!args.includeOpen) {
+  //   summaries = summaries.filter((summary) => summary.closedAt);
+  // }
 
   setLoadingText(`Logging summaries for ${linkedAddresses}`);
   logPositionSummaries(summaries);
   logSummaryAggregates(summaries, args.summary);
   if (args.csv) {
-    const filePath = args.csv.replace("~", homedir)
+    const filePath = args.csv.replace("~", homedir);
     await writePositionSummaries(summaries, filePath);
   }
 }
@@ -86,8 +89,8 @@ async function find() {
 
   setLoadingText(`Logging LPs ${logPool}`);
   if (args.asParams) {
-    const addresses = Array.from(walletValues.keys()).map(wallet => wallet.toString());
-    const params = addresses.map(address => `--address ${address}`).join(" ");
+    const addresses = Array.from(walletValues.keys()).map((wallet) => wallet.toString());
+    const params = addresses.map((address) => `--address ${address}`).join(" ");
     info(`pnl ${params}`);
   } else {
     logLiquidityProviderAggregates(walletValues);
